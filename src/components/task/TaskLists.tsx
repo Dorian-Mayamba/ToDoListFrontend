@@ -1,7 +1,8 @@
 import type { TaskListProps } from "../../types";
 import TaskItem from "./TaskItem";
 
-function TaskList({ tasks }: TaskListProps) {
+function TaskList({tasks} : TaskListProps) {
+    console.log(tasks);
     return <>
         {tasks.map(({id, name, description, status, priority }, index) => (
             <TaskItem

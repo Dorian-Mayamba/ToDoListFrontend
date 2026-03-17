@@ -1,48 +1,38 @@
-import { Box,Button, Link, TextField,Typography } from "@mui/material"
+import { useState } from "react";
 import {useNavigate} from 'react-router-dom';
+import type { RegisterState } from "../types";
+import RegisterForm from "../Forms/RegisterForm";
 
 function Register(){
     const navigate = useNavigate();
+
+    const initialState : RegisterState = {
+        name : '',
+        email: '',
+        password : '',
+        passwordConfirm : ''
+    };
+    
+    const [data, setData] = useState<RegisterState>(initialState);
     
     const HandleSubmit = (e: React.SubmitEvent<HTMLElement>) =>{
+        console.log(data);
+        
         navigate('/', {replace: true})
+    }
+
+    const HandleChange = (e : React.ChangeEvent<HTMLInputElement>) => {
+
+        const {name, value} = e.target;
+        
+        setData((prev) => ({...prev, [name] : value}));
     }
     
     return (
-        <Box component="form"
-        onSubmit={HandleSubmit}
-        sx={{ width: '40vw',  display: 'flex', flexDirection: 'column', gap: 2 }}
-        >
-            <TextField
-                    required
-                    id="username-required"
-                    label="name"
-                    placeholder="Enter your username"
-                    />
-                <TextField
-                    required 
-                    id="email-required"
-                    label="email"
-                    type="email"
-                    placeholder="enter your email"
-                    />
-                <TextField
-                    required
-                    id="password-required"
-                    label="password"
-                    type="password"
-                    placeholder="enter your password"
-                    />
-                <TextField
-                    required
-                    id="password-confirm-required"
-                    label="password-confirm"
-                    type="password"
-                    placeholder="confirm your password"
-                    />
-                <Button type="submit" variant="contained" color="primary">Sign Up</Button>
-                <Typography component="p">Already Have an Account? <Link href="/Login">Sign In</Link></Typography>
-        </Box>
-    )
+        <RegisterForm
+            onChange={HandleChange}
+            onSubmit={HandleSubmit}
+        />
+    );
 }
 export default Register;

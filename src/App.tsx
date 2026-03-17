@@ -5,24 +5,26 @@ import Register from './pages/register'
 import Home from './pages'
 import { DialogModeProvider } from './contexts/DialogModeProvider'
 import { TaskIdProvider } from './contexts/TaskIdProvider';
-import { FormProvider } from './contexts/FormProvider'
+import { TaskFormProvider } from './contexts/TaskFormProvider'
+import { AuthProvider } from './contexts/AuthProvider'
 
 function App() {
 
   return (
     <Router>
-      <TaskIdProvider>
-        <FormProvider>
-          <DialogModeProvider>
-            <Routes>
-              <Route path='/' element={<Home />} />
-              <Route path='/Login' element={<Login />} />
-              <Route path='/Register' element={<Register />} />
-            </Routes>
-          </DialogModeProvider>
-        </FormProvider>
-      </TaskIdProvider>
-
+      <AuthProvider>
+        <TaskIdProvider>
+          <TaskFormProvider>
+            <DialogModeProvider>
+              <Routes>
+                <Route path='/' element={<Home />} />
+                <Route path='/Login' element={<Login />} />
+                <Route path='/Register' element={<Register />} />
+              </Routes>
+            </DialogModeProvider>
+          </TaskFormProvider>
+        </TaskIdProvider>
+      </AuthProvider>
     </Router>
 
 

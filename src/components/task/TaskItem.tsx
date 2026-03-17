@@ -4,7 +4,7 @@ import type { TaskItemProps } from "../../types";
 import useDialog from "../../hooks/useDialog";
 import { useContext } from "react";
 import { taskIdContext } from "../../contexts/TaskIdProvider";
-import { taskContext } from "../../contexts/FormProvider";
+import { taskContext } from "../../contexts/TaskFormProvider";
 
 function TaskItem({id, name, description, status, priority }: TaskItemProps) {
 

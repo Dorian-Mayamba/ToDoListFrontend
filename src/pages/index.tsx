@@ -3,13 +3,13 @@ import { AddTask, Assignment, Dashboard, Settings, Task, TaskAlt, Logout } from 
 import { PieChart, useDrawingArea } from "@mui/x-charts";
 import { useContext, useState } from "react";
 import ToDoDialog from "./ToDoDialog";
-import AddTaskForm from "./AddTaskForm";
-import type { DialogModeProps, TaskItemProps } from "../types";
+import AddTaskForm from "../Forms/AddTaskForm";
+import type { DialogModeProps, TaskItemProps, TaskListProps } from "../types";
 import TaskList from "../components/task/TaskLists";
 import useDialog from "../hooks/useDialog";
-import EditTaskForm from "./EditTaskForm";
+import EditTaskForm from "../Forms/EditTaskForm";
 import DeleteDialog from "./DeleteDialog";
-import { taskContext } from "../contexts/FormProvider";
+import { taskContext } from "../contexts/TaskFormProvider";
 import { taskIdContext } from "../contexts/TaskIdProvider";
 
 const drawerWidth = 240;
@@ -36,21 +36,21 @@ function Home() {
 
     const [tasks, setTasks] = useState<TaskItemProps[]>([]);
     const { mode, UpdateDialogMode } = useDialog();
-    const {task : formData, updateTask, setTask, resetTask} = useContext(taskContext);
-    const {id} = useContext(taskIdContext);
+    const { task: formData, updateTask, resetTask } = useContext(taskContext);
+    const { id } = useContext(taskIdContext);
 
-    const handleSubmit = (e : React.SubmitEvent<HTMLFormElement>) => {
+    const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
-        
-        if (mode == 'EDIT') {
-            let tempTasks = [...tasks];
-            tempTasks.splice(id, 1, formData);
-            console.log(tempTasks);
-            setTasks(tempTasks);
-        } else if (mode == 'ADD'){
-            var id = tasks.length + 1;
-            setTask({...formData, id: id});
-            setTasks((prev) => [...prev, {...formData}]);                     
+
+        switch (mode) {
+            case "ADD":
+                setTasks((prev) => [...prev, { ...formData, id:prev.length + 1 }]);
+                break;
+            case "EDIT":
+                let tempTasks = [...tasks];
+                tempTasks.splice(id - 1, 1, formData);
+                setTasks(tempTasks);
+                break;
         }
         resetTask();
         CloseDialog();
@@ -82,7 +82,7 @@ function Home() {
                 description="Task Description"
                 title="Task Name"
                 onSubmit={handleSubmit}
-                onChange = {HandleChange}
+                onChange={HandleChange}
             />}
 
             {mode == 'EDIT' && <EditTaskForm
@@ -170,7 +170,7 @@ function Home() {
                             <List>
                                 {tasks.length > 0 ?
                                     <TaskList tasks={tasks} />
-                                    : <h1>Tasks not found</h1>}
+                                    : <h1>No task to display</h1>}
                             </List>
                         </Paper>
                     </Grid>
