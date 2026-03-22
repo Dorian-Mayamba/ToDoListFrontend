@@ -7,13 +7,14 @@ import { DialogModeProvider } from './contexts/DialogModeProvider'
 import { TaskIdProvider } from './contexts/TaskIdProvider';
 import { TaskFormProvider } from './contexts/TaskFormProvider'
 import { AuthProvider } from './contexts/AuthProvider'
+import { ActiveTaskProvider } from './contexts/ActiveTaskProvider'
 
 function App() {
 
   return (
     <Router>
       <AuthProvider>
-        <TaskIdProvider>
+        <ActiveTaskProvider>
           <TaskFormProvider>
             <DialogModeProvider>
               <Routes>
@@ -23,7 +24,7 @@ function App() {
               </Routes>
             </DialogModeProvider>
           </TaskFormProvider>
-        </TaskIdProvider>
+        </ActiveTaskProvider>
       </AuthProvider>
     </Router>
 

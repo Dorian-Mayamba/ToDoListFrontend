@@ -1,17 +1,18 @@
-import { Box, Container, Grid, Paper, Typography, Button, styled, Stack, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar, Divider, Link, ButtonGroup } from "@mui/material";
+import { Box, Container, Grid, Paper, Typography, Button, styled, Stack, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar, Divider, Link, ButtonGroup, type SelectChangeEvent } from "@mui/material";
 import { AddTask, Assignment, Dashboard, Settings, Task, TaskAlt, Logout } from '@mui/icons-material';
 import { PieChart, useDrawingArea } from "@mui/x-charts";
 import { useContext, useState } from "react";
 import ToDoDialog from "./ToDoDialog";
 import AddTaskForm from "../Forms/AddTaskForm";
-import type { DialogModeProps, TaskItemProps, TaskListProps, TaskResponse } from "../types";
+import type { DialogModeProps, TaskItemProps, TaskResponse } from "../types";
 import TaskList from "../components/task/TaskLists";
 import useDialog from "../hooks/useDialog";
 import EditTaskForm from "../Forms/EditTaskForm";
 import DeleteDialog from "./DeleteDialog";
 import { taskContext } from "../contexts/TaskFormProvider";
-import { taskIdContext } from "../contexts/TaskIdProvider";
 import useFetch from "../hooks/useFetch";
+import { activeTaskContext } from "../contexts/ActiveTaskProvider";
+import { taskEndpoint } from '../constants'
 
 const drawerWidth = 240;
 const sideBarWidth = 220;
@@ -38,48 +39,77 @@ function Home() {
     const [tasks, setTasks] = useState<TaskItemProps[]>([]);
     const { mode, UpdateDialogMode } = useDialog();
     const { task: formData, updateTask, resetTask } = useContext(taskContext);
-    const { id } = useContext(taskIdContext);
+    const { activeTask } = useContext(activeTaskContext);
+    const token = localStorage.getItem('token');
+    if (!token){
+        throw new Error('A jwtToken has to be set');
+    }
 
-    const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        switch (mode) {
-            case "ADD":
-
-                const {loading, error} = useFetch<TaskResponse>(import.meta.env.VITE_SERVER_URL as string,
-                    {
-                        body: JSON.stringify(
-                            {
-                                'name' : formData.name,
-                                'priority' : formData.priority,
-                                'status' : formData.status
-                            }
-                        )
+        if (mode == "ADD") {
+            const { data: task, loading, error } = await useFetch<TaskResponse>(import.meta.env.VITE_SERVER_URL as string,
+                {
+                    body: JSON.stringify(
+                        {
+                            'name': formData.name,
+                            'priority': formData.priority,
+                            'status': formData.status
+                        }
+                    ),
+                    headers : {
+                        'Authorization' : `Bearer ${token}`
                     }
-                )
-
-                if (!(loading && error)){
-                    setTasks((prev) => [...prev, { ...formData, id:prev.length + 1 }]);
                 }
-                
-                break;
-            case "EDIT":
-                let tempTasks = [...tasks];
-                tempTasks.splice(id - 1, 1, formData);
+            )
+
+            if (!(loading || error) && task) {
+                setTasks((prev) => [...prev, { ...task }]);
+            }
+        } else if (mode == "EDIT") {
+            let path = import.meta.env.VITE_SERVER_URL as string + taskEndpoint + '/' + formData.id
+            const { data: task, loading, error } = await useFetch<TaskResponse>(path,
+                {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        'name': formData.name,
+                        'priority': formData.priority,
+                        'status': formData.status
+                    }),
+                    headers : {
+                        'Authorization' : `Bearer ${token}`
+                    }
+                }
+            );
+
+            let tempTasks = [...tasks];
+            let idx = tempTasks.findIndex(t => t.id == activeTask.id);
+            if (!(loading || error) && task) {
+                tempTasks.splice(idx, 1, task);
                 setTasks(tempTasks);
-                break;
+            }
+
         }
         resetTask();
         CloseDialog();
     }
 
-    const HandleDelete = () => {
-        var filtered = tasks.filter(task => task.id != id);
-        setTasks(filtered);
-        CloseDialog();
+    const HandleDelete = async () => {
+        let path = import.meta.env.VITE_SERVER_URL as string + taskEndpoint + '/' + formData.id;
+        const { loading, error } = await useFetch<TaskResponse>(path, { method: 'DELETE', headers: {'Authorization' : `Bearer ${token}`} });
+        if (!(loading || error)) {
+            var filtered = tasks.filter(task => task.id != activeTask.id);
+            setTasks(filtered);
+            CloseDialog();
+        }
     }
 
     const HandleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        updateTask(e);
+    }
+
+    const HandleSelectChange = (e: SelectChangeEvent) => {
         updateTask(e);
     }
 
@@ -96,17 +126,19 @@ function Home() {
         <ToDoDialog onClose={CloseDialog} open={mode != null}>
 
             {mode == 'ADD' && <AddTaskForm
-                description="Task Description"
                 title="Task Name"
                 onSubmit={handleSubmit}
                 onChange={HandleChange}
+                onSelectChange={HandleSelectChange}
             />}
 
             {mode == 'EDIT' && <EditTaskForm
                 name={formData.name}
-                description={formData.description}
+                priority={formData.priority}
+                status={formData.status}
                 onSubmit={handleSubmit}
                 onChange={HandleChange}
+                onSelectChange={HandleSelectChange}
             />}
 
         </ToDoDialog>

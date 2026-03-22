@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import type { AuthResponse, RegisterState } from "../types";
 import RegisterForm from "../Forms/RegisterForm";
 import useFetch from "../hooks/useFetch";
+import { authEnpoint } from "../constants";
 
 function Register(){
     const navigate = useNavigate();
@@ -28,21 +29,21 @@ function Register(){
                 password : data.password
             });
             
-            const {data : response, loading, error} = await useFetch<AuthResponse>(import.meta.env.VITE_SERVER_URL as string , 
+            const path = import.meta.env.VITE_SERVER_URL as string + authEnpoint + '/register';
+            
+            const {data : response, loading, error} = await useFetch<AuthResponse>(path , 
                 {
                     method : 'POST',
                     body : fData,
                 }
             );
 
-            
-
-            if (response?.access){
-                localStorage.setItem('token', response?.access);
-            }   
+            if (!(loading || error) && response) {
+                localStorage.setItem('token', response.access);
+            }  
             
         } catch (err) {
-
+            
         }
         
         navigate('/', {replace: true})

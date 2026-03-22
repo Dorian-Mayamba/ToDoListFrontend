@@ -1,12 +1,4 @@
-import type { ChartSeriesTypeRequiredPlugins } from "@mui/x-charts/internals";
-
-export type TaskItemProps = {
-    id : number;
-    name: string;
-    description: string;
-    status: string;
-    priority: string;
-}
+export type TaskItemProps = TaskResponse;
 
 export type TaskListProps = {
     tasks: TaskItemProps[]
@@ -50,6 +42,7 @@ export type AuthResponse = {
 }
 
 export type TaskResponse = {
+    id : number;
     name : string;
     priority : string;
     status : string;

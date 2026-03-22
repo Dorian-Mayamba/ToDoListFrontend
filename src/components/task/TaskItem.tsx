@@ -3,30 +3,26 @@ import { Edit, DeleteForever } from "@mui/icons-material";
 import type { TaskItemProps } from "../../types";
 import useDialog from "../../hooks/useDialog";
 import { useContext } from "react";
-import { taskIdContext } from "../../contexts/TaskIdProvider";
 import { taskContext } from "../../contexts/TaskFormProvider";
 
-function TaskItem({id, name, description, status, priority }: TaskItemProps) {
+function TaskItem(task: TaskItemProps) {
 
+    const {name, status, priority } = task;
+    
     const { UpdateDialogMode } = useDialog();
-
-    const { updateTaskId } = useContext(taskIdContext);
 
     const {setTask} = useContext(taskContext);
 
     const HandleEdit = () => {
-        updateTaskId(id);
-
-        setTask({id, name, description, status, priority});
+        setTask(task);
 
         UpdateDialogMode('EDIT');
 
     }
 
     const HandleDelete = () => {
-        updateTaskId(id);
 
-        setTask({id, name, description, priority, status})
+        setTask(task)
 
         UpdateDialogMode('DELETE');
     }
@@ -41,7 +37,6 @@ function TaskItem({id, name, description, status, priority }: TaskItemProps) {
                 <Grid container padding={4}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }} component={"div"}>
                         <Typography variant="h5">{name}</Typography>
-                        <Typography component={"p"}>{description}</Typography>
                         <Stack gap={6} direction={"row"}>
                             <Typography component={"strong"}>{status}</Typography>
                             <Typography component={"strong"}>{priority}</Typography>
