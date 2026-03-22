@@ -1,13 +1,15 @@
 import { useState } from "react";
-import {useNavigate} from 'react-router-dom';
-import type { RegisterState } from "../types";
+import { useNavigate } from 'react-router-dom';
+import type { AuthResponse, RegisterState } from "../types";
 import RegisterForm from "../Forms/RegisterForm";
+import useFetch from "../hooks/useFetch";
 
 function Register(){
     const navigate = useNavigate();
 
     const initialState : RegisterState = {
-        name : '',
+        first_name : '',
+        last_name : '',
         email: '',
         password : '',
         passwordConfirm : ''
@@ -15,8 +17,33 @@ function Register(){
     
     const [data, setData] = useState<RegisterState>(initialState);
     
-    const HandleSubmit = (e: React.SubmitEvent<HTMLElement>) =>{
-        console.log(data);
+    const HandleSubmit = async (e: React.SubmitEvent<HTMLElement>) =>{
+
+        try {
+
+            var fData = JSON.stringify({
+                first_name : data.first_name,
+                last_name : data.last_name,
+                email : data.email,
+                password : data.password
+            });
+            
+            const {data : response, loading, error} = await useFetch<AuthResponse>(import.meta.env.VITE_SERVER_URL as string , 
+                {
+                    method : 'POST',
+                    body : fData,
+                }
+            );
+
+            
+
+            if (response?.access){
+                localStorage.setItem('token', response?.access);
+            }   
+            
+        } catch (err) {
+
+        }
         
         navigate('/', {replace: true})
     }

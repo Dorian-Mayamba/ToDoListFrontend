@@ -1,3 +1,5 @@
+import type { ChartSeriesTypeRequiredPlugins } from "@mui/x-charts/internals";
+
 export type TaskItemProps = {
     id : number;
     name: string;
@@ -26,9 +28,30 @@ export type LoginState = {
 }
 
 export type RegisterState = {
-    name : string;
+    first_name : string;
+    last_name : string;
     email : string;
     password : string;
     passwordConfirm : string;
+}
+
+export type UserDetail = {
+    pk : number;
+    username : string;
+    email : string;
+    first_name : string;
+    last_name : string;
+}
+
+export type AuthResponse = {
+    access : string;
+    refresh : string;
+    user : UserDetail;
+}
+
+export type TaskResponse = {
+    name : string;
+    priority : string;
+    status : string;
 }
 

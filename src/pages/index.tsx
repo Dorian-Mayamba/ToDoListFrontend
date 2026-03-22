@@ -4,13 +4,14 @@ import { PieChart, useDrawingArea } from "@mui/x-charts";
 import { useContext, useState } from "react";
 import ToDoDialog from "./ToDoDialog";
 import AddTaskForm from "../Forms/AddTaskForm";
-import type { DialogModeProps, TaskItemProps, TaskListProps } from "../types";
+import type { DialogModeProps, TaskItemProps, TaskListProps, TaskResponse } from "../types";
 import TaskList from "../components/task/TaskLists";
 import useDialog from "../hooks/useDialog";
 import EditTaskForm from "../Forms/EditTaskForm";
 import DeleteDialog from "./DeleteDialog";
 import { taskContext } from "../contexts/TaskFormProvider";
 import { taskIdContext } from "../contexts/TaskIdProvider";
+import useFetch from "../hooks/useFetch";
 
 const drawerWidth = 240;
 const sideBarWidth = 220;
@@ -44,7 +45,23 @@ function Home() {
 
         switch (mode) {
             case "ADD":
-                setTasks((prev) => [...prev, { ...formData, id:prev.length + 1 }]);
+
+                const {loading, error} = useFetch<TaskResponse>(import.meta.env.VITE_SERVER_URL as string,
+                    {
+                        body: JSON.stringify(
+                            {
+                                'name' : formData.name,
+                                'priority' : formData.priority,
+                                'status' : formData.status
+                            }
+                        )
+                    }
+                )
+
+                if (!(loading && error)){
+                    setTasks((prev) => [...prev, { ...formData, id:prev.length + 1 }]);
+                }
+                
                 break;
             case "EDIT":
                 let tempTasks = [...tasks];
