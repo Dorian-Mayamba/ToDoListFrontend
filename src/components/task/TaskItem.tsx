@@ -3,7 +3,7 @@ import { Edit, DeleteForever } from "@mui/icons-material";
 import type { TaskItemProps } from "../../types";
 import useDialog from "../../hooks/useDialog";
 import { useContext } from "react";
-import { taskContext } from "../../contexts/TaskFormProvider";
+import { activeTaskContext } from "../../contexts/ActiveTaskProvider";
 
 function TaskItem(task: TaskItemProps) {
 
@@ -11,10 +11,10 @@ function TaskItem(task: TaskItemProps) {
     
     const { UpdateDialogMode } = useDialog();
 
-    const {setTask} = useContext(taskContext);
+    const {updateActiveTask} = useContext(activeTaskContext);
 
     const HandleEdit = () => {
-        setTask(task);
+        updateActiveTask(task);
 
         UpdateDialogMode('EDIT');
 
@@ -22,7 +22,7 @@ function TaskItem(task: TaskItemProps) {
 
     const HandleDelete = () => {
 
-        setTask(task)
+        updateActiveTask(task)
 
         UpdateDialogMode('DELETE');
     }
