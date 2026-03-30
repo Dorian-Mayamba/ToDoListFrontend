@@ -3,8 +3,8 @@ import {useNavigate} from 'react-router-dom';
 import type { AuthResponse, LoginState } from "../types";
 import { useState } from "react";
 import LoginForm from "../Forms/LoginForm";
-import useFetch from "../hooks/useFetch";
 import { authEnpoint } from "../constants";
+import FetchHelper from "../helpers/fetchHelper";
 
 
 const initialState : LoginState = {
@@ -12,29 +12,47 @@ const initialState : LoginState = {
     password: ''
 };
 
+const authResponseInitialState : AuthResponse | undefined = undefined;
+
 function Login() {
 
     const navigate = useNavigate();
 
+    const [data, setData] = useState<AuthResponse | undefined>(authResponseInitialState);
     const [login, setLogin] = useState<LoginState>(initialState);
+    const [loading, setLoading] = useState(false);
     
     const HandleSubmit = async (e: React.SubmitEvent<HTMLElement>) => {
+        e.preventDefault();
 
-        const {data, loading, error} = await useFetch<AuthResponse>(import.meta.env.VITE_SERVER_URL + authEnpoint + '/login',
-            {
-                method : 'POST',
-                body : JSON.stringify(login)
-            }
-        );
+        try{
+            const {data : response} = await FetchHelper<AuthResponse>(import.meta.env.VITE_SERVER_URL + authEnpoint + '/login',
+                {
+                    method : 'POST',
+                    body : JSON.stringify(login),
+                    headers : {
+                        'Content-Type' : 'application/json'
+                    }
+                }
+            );
+            setData(response);
+            
+        } catch (err){
 
-        if (!(loading || error) && data){
+        } finally {
+            setLoading(false);
+        }
+
+        if (!(loading) && data){
             localStorage.setItem("token", data.access);
+            localStorage.setItem('user', JSON.stringify(data.user));
             navigate('/', {replace: true})
-        }   
+        }
+                   
         
     }
 
-    const HandleChange = (e : React.ChangeEvent<HTMLInputElement>) =>{
+    const HandleChange = (e : React.ChangeEvent<HTMLInputElement>) =>{        
         const {name, value} = e.target;
 
         setLogin((prev) => ({...prev, [name]:value}));

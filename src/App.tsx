@@ -1,15 +1,21 @@
 import './App.css'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom'
 import Login from './pages/login'
 import Register from './pages/register'
 import Home from './pages'
 import { DialogModeProvider } from './contexts/DialogModeProvider'
-import { TaskIdProvider } from './contexts/TaskIdProvider';
 import { TaskFormProvider } from './contexts/TaskFormProvider'
 import { AuthProvider } from './contexts/AuthProvider'
 import { ActiveTaskProvider } from './contexts/ActiveTaskProvider'
 
 function App() {
+
+  
+  const PrivateRoutes = () => {
+    const token = localStorage.getItem('token');
+
+    return token ? <Outlet /> : <Navigate to={"/login"}/>
+  }
 
   return (
     <Router>
@@ -18,9 +24,12 @@ function App() {
           <TaskFormProvider>
             <DialogModeProvider>
               <Routes>
-                <Route path='/' element={<Home />} />
-                <Route path='/Login' element={<Login />} />
+                <Route element={<PrivateRoutes />}>
+                  {" "}
+                  <Route path='/' element={<Home />}/>
+                </Route>
                 <Route path='/Register' element={<Register />} />
+                <Route path='/login' element={<Login />}/>
               </Routes>
             </DialogModeProvider>
           </TaskFormProvider>

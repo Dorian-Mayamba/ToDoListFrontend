@@ -2,8 +2,8 @@ import { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import type { AuthResponse, RegisterState } from "../types";
 import RegisterForm from "../Forms/RegisterForm";
-import useFetch from "../hooks/useFetch";
 import { authEnpoint } from "../constants";
+import FetchHelper from "../helpers/fetchHelper";
 
 function Register(){
     const navigate = useNavigate();
@@ -15,45 +15,47 @@ function Register(){
         password : '',
         passwordConfirm : ''
     };
+
+    const authResponseInitialState : AuthResponse | undefined = undefined;
     
-    const [data, setData] = useState<RegisterState>(initialState);
+    
+    const [register, setRegister] = useState<RegisterState>(initialState);
+    const [data, setData] = useState<AuthResponse | undefined>(authResponseInitialState);
+    const [loading, setLoading] = useState(false);
     
     const HandleSubmit = async (e: React.SubmitEvent<HTMLElement>) =>{
+        e.preventDefault();
 
-        try {
-
-            var fData = JSON.stringify({
-                first_name : data.first_name,
-                last_name : data.last_name,
-                email : data.email,
-                password : data.password
-            });
-            
-            const path = import.meta.env.VITE_SERVER_URL as string + authEnpoint + '/register';
-            
-            const {data : response, loading, error} = await useFetch<AuthResponse>(path , 
+        try{
+            const {data : response} = await FetchHelper<AuthResponse>(import.meta.env.VITE_SERVER_URL + authEnpoint + '/login',
                 {
                     method : 'POST',
-                    body : fData,
+                    body : JSON.stringify(register),
+                    headers : {
+                        'Content-Type' : 'application/json'
+                    }
                 }
             );
+            setData(response);
+            
+        } catch (err){
 
-            if (!(loading || error) && response) {
-                localStorage.setItem('token', response.access);
-            }  
-            
-        } catch (err) {
-            
+        } finally {
+            setLoading(false);
         }
-        
-        navigate('/', {replace: true})
+
+        if (!(loading) && data){
+            localStorage.setItem("token", data.access);
+            localStorage.setItem('user', JSON.stringify(data.user));
+            navigate('/', {replace: true});
+        }
     }
 
     const HandleChange = (e : React.ChangeEvent<HTMLInputElement>) => {
 
         const {name, value} = e.target;
         
-        setData((prev) => ({...prev, [name] : value}));
+        setRegister((prev) => ({...prev, [name] : value}));
     }
     
     return (
