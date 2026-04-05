@@ -11,6 +11,7 @@ interface EditTaskFormProps {
 }
 
 function EditTaskForm({ name, status, priority, onSubmit, onChange, onSelectChange }: EditTaskFormProps) {
+    let statusKeyVal = Object.entries(statuses).find(([key, value]) => status == value);
     return <Box component={"form"} onSubmit={onSubmit}>
         <div className="form-group">
             <TextField
@@ -18,20 +19,21 @@ function EditTaskForm({ name, status, priority, onSubmit, onChange, onSelectChan
                 defaultValue={name}
                 label="task name"
                 name="name"
+                value={name}
                 placeholder="task name"
                 onChange={onChange}
             />
         </div>
         <div className="form-group">
-            <Select label="task priority" defaultValue={priority} className="form-control" name="priority"
+            <Select label="task priority" value={priority} defaultValue={priority} className="form-control" name="priority"
                 onChange={onSelectChange}
                 >
             {priorities.map((priority, index) => <MenuItem value={priority}>{priority}</MenuItem>)}
             </Select>   
         </div>
         <div className="form-group">
-            <Select label="task status" onChange={onSelectChange} defaultValue={status} className="form-control" name="status">
-                {statuses.map((status, index) => <MenuItem value={status}>{status}</MenuItem>)}
+            <Select label="task status" value={status} onChange={onSelectChange} defaultValue={statusKeyVal ? statusKeyVal[0] : ''} className="form-control" name="status">
+                {Object.entries(statuses).map(([key, value]) => <MenuItem value={key}>{value}</MenuItem>)}
             </Select>
         </div>
         <div className="form-group">

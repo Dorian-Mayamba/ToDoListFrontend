@@ -4,6 +4,7 @@ import type { TaskItemProps } from "../../types";
 import useDialog from "../../hooks/useDialog";
 import { useContext } from "react";
 import { activeTaskContext } from "../../contexts/ActiveTaskProvider";
+import { taskContext } from "../../contexts/TaskFormProvider";
 
 function TaskItem(task: TaskItemProps) {
 
@@ -12,17 +13,19 @@ function TaskItem(task: TaskItemProps) {
     const { UpdateDialogMode } = useDialog();
 
     const {updateActiveTask} = useContext(activeTaskContext);
+    const {setTask} = useContext(taskContext);
 
     const HandleEdit = () => {
         updateActiveTask(task);
-
+        setTask(task);
+        
         UpdateDialogMode('EDIT');
 
     }
 
     const HandleDelete = () => {
 
-        updateActiveTask(task)
+        updateActiveTask(task);
 
         UpdateDialogMode('DELETE');
     }

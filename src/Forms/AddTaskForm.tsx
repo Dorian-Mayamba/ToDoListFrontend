@@ -30,7 +30,7 @@ function AddTaskForm(props: AddTaskFormProps){
             </Select>
 
             <Select name="status" onChange={onSelectChange}>
-                {statuses.map((status) => <MenuItem value={status}>{status}</MenuItem>)}
+                {Object.entries(statuses).map(([key, value]) => <MenuItem value={key}>{value}</MenuItem>)}
             </Select>
             
             <Button variant="outlined" color="primary" type="submit">Add Task</Button>

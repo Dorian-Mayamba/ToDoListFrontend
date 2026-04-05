@@ -64,19 +64,27 @@ function Home() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (!(loading && error) && tasksResponse){
+        if (!(isLoading && error) && tasksResponse){
             setTasks(tasksResponse);
         }
 
-    }, [taskResponse])
+        if (!(isLoading) && taskResponse) {
+
+        }
+
+        if (error){
+            console.log(error);
+        }
+
+    }, [tasksResponse, taskResponse])
 
     const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
-
+        console.log(formData);
         if (mode == "ADD") {
             try {
                 setLoading(true);
-                const { data: task } = await FetchHelper<TaskResponse>(import.meta.env.VITE_SERVER_URL as string,
+                const { data: task } = await FetchHelper<TaskResponse>(import.meta.env.VITE_SERVER_URL + taskEndpoint + '/',
                     {
                         body: JSON.stringify(
                             {
@@ -86,13 +94,15 @@ function Home() {
                             }
                         ),
                         headers : {
-                            'Authorization' : `Bearer ${token}`
-                        }
+                            'Authorization' : `Bearer ${token}`,
+                            'Content-Type' : 'application/json'
+                        },
+                        method : 'POST'
                     }
                 )
                 setTaskResponse(task);
             } catch (err){
-
+                console.log(err);
             } finally {
                 setLoading(false);
             }
@@ -102,7 +112,7 @@ function Home() {
                 setTasks((prev) => [...prev, { ...taskResponse }]);
             }
         } else if (mode == "EDIT") {
-            let path = import.meta.env.VITE_SERVER_URL as string + taskEndpoint + '/' + formData.id
+            let path = import.meta.env.VITE_SERVER_URL as string + taskEndpoint + '/' + activeTask.id + '/';
             try{
                 const { data: task } = await FetchHelper<TaskResponse>(path,
                     {
@@ -113,13 +123,14 @@ function Home() {
                             'status': formData.status
                         }),
                         headers : {
-                            'Authorization' : `Bearer ${token}`
+                            'Authorization' : `Bearer ${token}`,
+                            'Content-Type' : 'application/json'
                         }
                     }
                 );
                 setTaskResponse(task);
             } catch (err){
-
+                console.log(err);
             } finally {
                 setLoading(false);
             }
@@ -138,7 +149,7 @@ function Home() {
     }
 
     const HandleDelete = async () => {
-        let path = import.meta.env.VITE_SERVER_URL as string + taskEndpoint + '/' + formData.id + '/';
+        let path = import.meta.env.VITE_SERVER_URL as string + taskEndpoint + '/' + activeTask.id + '/';
         try {
             setLoading(true);
             await FetchHelper(path, { method: 'DELETE', headers: {'Authorization' : `Bearer ${token}`} });
