@@ -13,15 +13,6 @@ function TaskItem(task: TaskItemProps) {
     const { UpdateDialogMode } = useDialog();
 
     const {updateActiveTask} = useContext(activeTaskContext);
-    const {setTask} = useContext(taskContext);
-
-    const HandleEdit = () => {
-        updateActiveTask(task);
-        setTask(task);
-        
-        UpdateDialogMode('EDIT');
-
-    }
 
     const HandleDelete = () => {
 
@@ -34,7 +25,7 @@ function TaskItem(task: TaskItemProps) {
         <ListItemButton>
             <Paper>
                 <Stack spacing={-3.5} justifyContent={"right"} direction={"row"}>
-                    <Button onClick={HandleEdit}><Edit /></Button>
+                    <Button href={`/tasks/${task.id}/edit`}><Edit /></Button>
                     <Button onClick={HandleDelete}><DeleteForever /></Button>
                 </Stack>
                 <Grid container padding={4}>

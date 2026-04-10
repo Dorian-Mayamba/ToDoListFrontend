@@ -1,5 +1,5 @@
 import { Box, Container, Grid, Paper, Typography, Button, styled, Stack, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar, Divider, Link, ButtonGroup, type SelectChangeEvent } from "@mui/material";
-import { AddTask, Assignment, Dashboard, Settings, Task, TaskAlt, Logout } from '@mui/icons-material';
+import { AddTask, Assignment, Dashboard, Settings, Task, TaskAlt, Logout, ConfirmationNumberRounded } from '@mui/icons-material';
 import { PieChart, useDrawingArea } from "@mui/x-charts";
 import { useContext, useEffect, useState } from "react";
 import ToDoDialog from "./ToDoDialog";
@@ -42,8 +42,6 @@ function Home() {
     const [loading, setLoading] = useState<Boolean>(false);
     
     const { mode, UpdateDialogMode } = useDialog();
-    const { task: formData, updateTask, resetTask } = useContext(taskContext);
-    const [taskResponse, setTaskResponse] = useState<TaskResponse>();
     const { activeTask } = useContext(activeTaskContext);
     const token = localStorage.getItem('token');
     if (!token){
@@ -64,89 +62,17 @@ function Home() {
     const navigate = useNavigate();
 
     useEffect(() => {
+        console.log('effect run');
         if (!(isLoading && error) && tasksResponse){
+            console.log('loading tasks')
             setTasks(tasksResponse);
-        }
-
-        if (!(isLoading) && taskResponse) {
-
         }
 
         if (error){
             console.log(error);
         }
 
-    }, [tasksResponse, taskResponse])
-
-    const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        console.log(formData);
-        if (mode == "ADD") {
-            try {
-                setLoading(true);
-                const { data: task } = await FetchHelper<TaskResponse>(import.meta.env.VITE_SERVER_URL + taskEndpoint + '/',
-                    {
-                        body: JSON.stringify(
-                            {
-                                'name': formData.name,
-                                'priority': formData.priority,
-                                'status': formData.status
-                            }
-                        ),
-                        headers : {
-                            'Authorization' : `Bearer ${token}`,
-                            'Content-Type' : 'application/json'
-                        },
-                        method : 'POST'
-                    }
-                )
-                setTaskResponse(task);
-            } catch (err){
-                console.log(err);
-            } finally {
-                setLoading(false);
-            }
-            
-
-            if (!loading && taskResponse) {
-                setTasks((prev) => [...prev, { ...taskResponse }]);
-            }
-        } else if (mode == "EDIT") {
-            let path = import.meta.env.VITE_SERVER_URL as string + taskEndpoint + '/' + activeTask.id + '/';
-            try{
-                const { data: task } = await FetchHelper<TaskResponse>(path,
-                    {
-                        method: 'PUT',
-                        body: JSON.stringify({
-                            'name': formData.name,
-                            'priority': formData.priority,
-                            'status': formData.status
-                        }),
-                        headers : {
-                            'Authorization' : `Bearer ${token}`,
-                            'Content-Type' : 'application/json'
-                        }
-                    }
-                );
-                setTaskResponse(task);
-            } catch (err){
-                console.log(err);
-            } finally {
-                setLoading(false);
-            }
-            
-
-            let tempTasks = [...tasks];
-            let idx = tempTasks.findIndex(t => t.id == activeTask.id);
-            if (!(loading) && taskResponse) {
-                tempTasks.splice(idx, 1, taskResponse);
-                setTasks(tempTasks);
-            }
-
-        }
-        resetTask();
-        CloseDialog();
-    }
+    }, [tasksResponse]);
 
     const HandleDelete = async () => {
         let path = import.meta.env.VITE_SERVER_URL as string + taskEndpoint + '/' + activeTask.id + '/';
@@ -165,14 +91,6 @@ function Home() {
         }
     }
 
-    const HandleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        updateTask(e);
-    }
-
-    const HandleSelectChange = (e: SelectChangeEvent) => {
-        updateTask(e);
-    }
-
     const OpenDialog = (dialogMode: DialogModeProps) => {
         UpdateDialogMode(dialogMode);
     }
@@ -187,27 +105,11 @@ function Home() {
         navigate('/login', {replace : true});
     }
 
+    function AddTaskFunc() {
+        navigate('/tasks/add', {replace : true});
+    }
+
     return <>
-
-        <ToDoDialog onClose={CloseDialog} open={mode != null}>
-
-            {mode == 'ADD' && <AddTaskForm
-                title="Task Name"
-                onSubmit={handleSubmit}
-                onChange={HandleChange}
-                onSelectChange={HandleSelectChange}
-            />}
-
-            {mode == 'EDIT' && <EditTaskForm
-                name={formData.name}
-                priority={formData.priority}
-                status={formData.status}
-                onSubmit={handleSubmit}
-                onChange={HandleChange}
-                onSelectChange={HandleSelectChange}
-            />}
-
-        </ToDoDialog>
 
         {mode == 'DELETE' &&
             <DeleteDialog
@@ -281,7 +183,7 @@ function Home() {
                     <Grid size={6}>
                         <Paper>
                             <Typography component='strong'><Task></Task>ToDo</Typography>
-                            <Button onClick={(e) => { e.preventDefault(); OpenDialog('ADD') }} sx={{ float: 'right' }} variant="text"><AddTask /> Add task</Button>
+                            <Button href="/tasks/add" sx={{ float: 'right' }} variant="text"><AddTask /> Add task</Button>
                             <List>
                                 {tasks.length > 0 ?
                                     <TaskList tasks={tasks} />
