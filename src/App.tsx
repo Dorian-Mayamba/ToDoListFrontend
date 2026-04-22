@@ -1,21 +1,32 @@
-import './App.css'
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom'
-import Login from './pages/login'
-import Register from './pages/register'
-import Home from './pages'
-import { DialogModeProvider } from './contexts/DialogModeProvider'
-import { TaskFormProvider } from './contexts/TaskFormProvider'
-import { AuthProvider } from './contexts/AuthProvider'
-import { ActiveTaskProvider } from './contexts/ActiveTaskProvider'
+import './App.css';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import Login from './pages/login';
+import Register from './pages/register';
+import Home from './pages';
+import { DialogModeProvider } from './contexts/DialogModeProvider';
+import { TaskFormProvider } from './contexts/TaskFormProvider';
+import { AuthProvider } from './contexts/AuthProvider';
+import { ActiveTaskProvider } from './contexts/ActiveTaskProvider';
 import EditTask from './pages/tasks/editTasks';
-import AddTask from './pages/tasks/addTasks'
+import AddTask from './pages/tasks/addTasks';
+import Sidebar from './components/Navbar';
+import { Box } from '@mui/material';
 
 function App() {
 
+
   const PrivateRoutes = () => {
     const token = localStorage.getItem('token');
+    
+    return token ? (
+      <Box sx={{ display: 'flex' }}>
+        <Sidebar /> 
+        <Box component={"main"} sx={{ flexGrow: 1 }}>
+          <Outlet />
+        </Box>
+      </Box>
 
-    return token ? <Outlet /> : <Navigate to={"/login"}/>
+    ) : <Navigate to={"/login"} />
   }
 
   return (
@@ -27,12 +38,12 @@ function App() {
               <Routes>
                 <Route element={<PrivateRoutes />}>
                   {" "}
-                  <Route path='/' element={<Home />}/>
-                  <Route path='/tasks/add' element={<AddTask />}/>
-                  <Route path= '/tasks/:id/edit' element={<EditTask />} />
+                  <Route path='/' element={<Home />} />
+                  <Route path='/tasks/add' element={<AddTask />} />
+                  <Route path='/tasks/:id/edit' element={<EditTask />} />
                 </Route>
                 <Route path='/Register' element={<Register />} />
-                <Route path='/login' element={<Login />}/>
+                <Route path='/login' element={<Login />} />
               </Routes>
             </DialogModeProvider>
           </TaskFormProvider>
